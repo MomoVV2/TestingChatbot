@@ -1,9 +1,9 @@
-// optimized-server.js - Using the new knowledge management system
+// Enhanced server.js with better knowledge base matching
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
 const http = require('http');
-const knowledge = require('./knowledgeManager');
+const { findBestMatch, loadFAQs } = require('./knowledge');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -73,17 +73,13 @@ function testOllamaConnection() {
   req.end();
 }
 
-// Initialize knowledge system
-knowledge.initKnowledgeDir();
-
 // Serve the main index.html
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// API endpoint to chat
-app.post('/api/chat', async (req, res) => {
-  const startTime = Date.now();
+// API endpoint to chat directly with Ollama
+app.post('/api/chat', (req, res) => {
   const { message, modelName } = req.body;
   
   if (!message) {
@@ -93,43 +89,19 @@ app.post('/api/chat', async (req, res) => {
   console.log(`Received message: "${message}"`);
   console.log(`Using model: ${modelName || 'llama3:8b'}`);
   
-  // STEP 1: Try to find a match in our knowledge base (very fast)
-  const knowledgeMatch = knowledge.findBestMatch(message);
+  // First check if we have a knowledge base match
+  const knowledgeMatch = findBestMatch(message);
   
-  // If we have a good match (confidence > 0.7), return immediately
-  if (knowledgeMatch && knowledgeMatch.confidence > 0.7) {
+  // If we have a high-confidence match, return it directly
+  if (knowledgeMatch && knowledgeMatch.confidence > 1.0) {
     console.log(`Using knowledge base answer with confidence ${knowledgeMatch.confidence}`);
-    console.log(`Response time: ${Date.now() - startTime}ms`);
     return res.json({ response: knowledgeMatch.answer });
   }
   
-  // STEP 2: For medium confidence (0.3-0.7), use as context but verify with LLM
-  if (knowledgeMatch && knowledgeMatch.confidence > 0.3) {
-    console.log(`Using knowledge base context with confidence ${knowledgeMatch.confidence}`);
-    
-    // Use a simplified context prompt for speed
-    return sendToOllama(
-      req, 
-      res, 
-      message, 
-      modelName, 
-      `You are NordicBank's AI assistant. Be brief and direct.
-      
-The user's question is related to: "${knowledgeMatch.question}"
-The appropriate answer is: "${knowledgeMatch.answer}"
-
-Rephrase this answer if needed, but keep it clear and concise.`,
-      startTime
-    );
-  }
+  // Load all FAQs for context
+  const faqs = loadFAQs();
   
-  // STEP 3: For low confidence or no match, use the full knowledge context
-  console.log('No good knowledge match, using full context');
-  
-  // Get all FAQs for context
-  const faqs = knowledge.loadAllFaqs();
-  
-  // Create system prompt
+  // Create system prompt with strong guidance
   const systemPrompt = `You are NordicBank's AI assistant for in-app support. Your job is to help customers with their banking questions.
 
 IMPORTANT GUIDELINES:
@@ -139,18 +111,13 @@ IMPORTANT GUIDELINES:
 4. Only answer banking-related questions.
 5. If asked about specific account details, say you don't have access to personal account information.
 6. NEVER mention other services like Google, Apple, Facebook, etc.
+7. ALWAYS try to use the knowledge base first.
 
 KNOWLEDGE BASE:
-${faqs.map(faq => `Q: ${faq.question}\nA: ${faq.answer}`).join('\n\n')}`;
+${faqs.map(faq => `Q: ${faq.question}\nA: ${faq.answer}`).join('\n\n')}
 
-  // Send to Ollama with full context
-  return sendToOllama(req, res, message, modelName, systemPrompt, startTime);
-});
+${knowledgeMatch ? `USER QUESTION MATCHED: "${knowledgeMatch.question}" with confidence ${knowledgeMatch.confidence}. Try to base your answer on this knowledge base entry.` : ''}`;
 
-/**
- * Helper function to send requests to Ollama
- */
-function sendToOllama(req, res, message, modelName, systemPrompt, startTime) {
   // Create request data for Ollama
   const postData = JSON.stringify({
     model: modelName || 'llama3:8b',
@@ -185,7 +152,6 @@ function sendToOllama(req, res, message, modelName, systemPrompt, startTime) {
     
     ollamaRes.on('end', () => {
       console.log('Response received from Ollama');
-      console.log(`Total response time: ${Date.now() - startTime}ms`);
       
       if (ollamaRes.statusCode !== 200) {
         console.error(`Ollama returned status code ${ollamaRes.statusCode}`);
@@ -221,23 +187,6 @@ function sendToOllama(req, res, message, modelName, systemPrompt, startTime) {
   // Write post data and end request
   ollamaReq.write(postData);
   ollamaReq.end();
-}
-
-// Admin route to refresh knowledge base
-app.post('/api/admin/refresh-knowledge', (req, res) => {
-  try {
-    const faqs = knowledge.loadAllFaqs(true);
-    res.json({ 
-      success: true, 
-      message: `Successfully refreshed knowledge base. Loaded ${faqs.length} FAQs.` 
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: 'Failed to refresh knowledge base', 
-      error: error.message 
-    });
-  }
 });
 
 // Start the server

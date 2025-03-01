@@ -1,0 +1,32 @@
+# Hanseatic Bank Mobile App FAQs
+# Format: Question | Keywords | Answer
+
+What is the Hanseatic Bank Mobile App? | app, mobile, hanseatic, about, overview | The Hanseatic Bank Mobile App is a companion app for managing your Hanseatic Bank credit card. It's available for both Android and iOS devices and is free to download and use, though an internet connection is required.
+
+What are the system requirements for the app? | requirements, system, compatibility, android, ios, version | The Hanseatic Bank Mobile App requires Android Version 8.0 or newer, or iOS 16.0 or newer. The app is not optimized for tablets.
+
+What features does the app offer? | features, functionality, capabilities | The app offers several features including transaction overview with push notifications, payment management, security controls (card blocking options), personalization settings, and integration with Apple Pay/Google Pay.
+
+How do I change my PIN? | pin, change, update, new, reset | To change your PIN, go to "Karten- und Kontoservice" (Card and Account Service) in the app, then select "Meine Wunsch-PIN" (My Desired PIN). Enter your new PIN twice and confirm. This requires two-factor authentication using either the Hanseatic Bank Secure app or smsTAN. You can change your PIN as often as you like.
+
+What should I do if I forget my password? | password, forgot, reset, recover, login | If you've forgotten your password, tap on "Passwort vergessen" (Forgot Password) on the login page of "Meine Hanseatic Bank". Follow the instructions to reset it, which typically involves verifying your identity through your registered email address or mobile number. Note that changing your password updates it for both Meine Hanseatic Bank and the Mobile App.
+
+How can I block my credit card if it's lost or stolen? | block, card, lost, stolen, emergency | The app has an emergency block feature that allows you to immediately block your card if it's lost or stolen. Navigate to the card security section in the app and select the emergency block option.
+
+Can I customize which transactions are allowed on my card? | customize, block, transactions, security | Yes, the app allows you to block or unblock your credit card for specific uses such as cash withdrawals, international transactions, or online shopping.
+
+How do I update my personal information? | update, personal, information, contact, address, email | You can change your personal data such as address, mobile number, and email directly through the app in the personalization section.
+
+Can I use the app with Apple Pay or Google Pay? | apple pay, google pay, digital wallet | Yes, the app allows you to easily add your Hanseatic Bank credit card to both Apple Pay and Google Pay.
+
+How do I monitor my transactions? | transactions, view, monitor, overview, spending | The app provides a clear and up-to-date view of your transactions and available credit limit. You can also receive push notifications for each transaction to stay informed in real-time.
+
+Can I make payments through the app? | payments, transfer, repayment | Yes, you can transfer funds to your checking account and adjust your repayment amount through the app.
+
+What security features does the app have? | security, protection, authentication | The app offers several security features including fingerprint login (Touch ID), facial recognition (Face ID), two-factor authentication, and the ability to block your card for specific uses or entirely in case of emergency.
+
+Is there an additional authentication app? | secure app, authentication, 2FA | Yes, Hanseatic Bank also has a separate "Hanseatic Bank Secure" app specifically for securely authorizing online payments using two-factor authentication.
+
+How do I set up my PIN as a new customer? | new customer, setup, initial PIN | As a new customer, you can set up your PIN after scanning the QR code that you receive with your credit card.
+
+How often can I change my PIN? | frequency, change PIN | You can change your PIN as often as you like through the app or online banking.
