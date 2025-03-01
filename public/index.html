@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NordicBank AI Assistant</title>
+    <style>
+        :root {
+            --primary-color: #0066cc;
+            --secondary-color: #f0f8ff;
+            --text-color: #333;
+            --light-gray: #f5f5f5;
+            --border-color: #ddd;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f9f9f9;
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            background-color: white;
+        }
+
+        .chat-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-header h1 {
+            font-size: 1.5rem;
+            margin-left: 10px;
+        }
+
+        .chat-header-logo {
+            width: 30px;
+            height: 30px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-header-logo span {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            max-width: 80%;
+            padding: 12px 15px;
+            border-radius: 20px;
+            line-height: 1.5;
+        }
+
+        .user-message {
+            background-color: var(--secondary-color);
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        .assistant-message {
+            background-color: var(--light-gray);
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            color: #888;
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid var(--border-color);
+        }
+
+        #message-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 30px;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        #message-input:focus {
+            border-color: var(--primary-color);
+        }
+
+        #send-button {
+            margin-left: 10px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        #send-button:hover {
+            background-color: #0055aa;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            background-color: var(--light-gray);
+            padding: 12px 15px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            border-bottom-left-radius: 5px;
+        }
+
+        .typing-indicator span {
+            height: 8px;
+            width: 8px;
+            background-color: #888;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 3px;
+            animation: typing 1s infinite;
+        }
+
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+            margin-right: 0;
+        }
+
+        @keyframes typing {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+
+        .model-selector {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .model-selector label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        #model-select {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="model-selector">
+            <label for="model-select">Select AI Model:</label>
+            <select id="model-select">
+                <option value="llama3:8b">Llama3 8B</option>
+                <option value="gemma:7b">Gemma 7B</option>
+                <option value="phi3:mini">Phi-3 Mini</option>
+                <option value="mistral:7b">Mistral 7B</option>
+            </select>
+        </div>
+        
+        <div class="chat-container">
+            <div class="chat-header">
+                <div class="chat-header-logo">
+                    <span>N</span>
+                </div>
+                <h1>NordicBank Assistant</h1>
+            </div>
+            
+            <div class="chat-messages" id="chat-messages">
+                <div class="message assistant-message">
+                    Hello! I'm your NordicBank assistant. How can I help you today?
+                    <div class="message-time">Now</div>
+                </div>
+                
+                <div class="typing-indicator" id="typing-indicator">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+            
+            <div class="chat-input">
+                <input type="text" id="message-input" placeholder="Type your message here...">
+                <button id="send-button">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample FAQ data (in a real implementation, this would be loaded from a file or API)
+        const faqData = [
+            {
+                question: "How do I change my password?",
+                answer: "To change your password, go to 'Settings' in the app menu, select 'Security', and then tap on 'Change Password'. You'll need to enter your current password first, then your new password twice."
+            },
+            {
+                question: "How do I transfer money?",
+                answer: "To transfer money, tap on 'Transfers' in the bottom menu, select the account you want to transfer from, enter the recipient's details, and follow the prompts to complete the transfer."
+            },
+            {
+                question: "What are the opening hours?",
+                answer: "Our branches are typically open Monday to Friday from 9:00 AM to 4:00 PM. Some locations may have extended hours or Saturday hours. You can check the exact opening hours for your local branch in the 'Locations' section of the app."
+            },
+            {
+                question: "How do I report a lost card?",
+                answer: "To report a lost or stolen card, please go to 'Cards' in the app menu, select the affected card, and tap on 'Report Lost/Stolen'. Alternatively, you can call our 24/7 customer service at +46 123 456 789."
+            },
+            {
+                question: "How do I activate my new card?",
+                answer: "To activate your new card, go to 'Cards' in the app menu, select your new card, and tap on 'Activate Card'. You'll need to enter the last 4 digits of your card number and follow the verification steps."
+            }
+        ];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const messageInput = document.getElementById('message-input');
+            const sendButton = document.getElementById('send-button');
+            const chatMessages = document.getElementById('chat-messages');
+            const typingIndicator = document.getElementById('typing-indicator');
+            const modelSelect = document.getElementById('model-select');
+
+            // Function to add a message to the chat
+            function addMessage(message, isUser = false) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message');
+                messageElement.classList.add(isUser ? 'user-message' : 'assistant-message');
+                
+                messageElement.innerHTML = message;
+                
+                const timeElement = document.createElement('div');
+                timeElement.classList.add('message-time');
+                timeElement.textContent = 'Now';
+                
+                messageElement.appendChild(timeElement);
+                
+                // Insert before typing indicator
+                chatMessages.insertBefore(messageElement, typingIndicator);
+                
+                // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // Function to show typing indicator
+            function showTypingIndicator() {
+                typingIndicator.style.display = 'block';
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // Function to hide typing indicator
+            function hideTypingIndicator() {
+                typingIndicator.style.display = 'none';
+            }
+
+            // Function to send a message to the AI
+            function sendMessage() {
+                const message = messageInput.value.trim();
+                if (message === '') return;
+                
+                // Add user message to chat
+                addMessage(message, true);
+                
+                // Clear input
+                messageInput.value = '';
+                
+                // Show typing indicator
+                showTypingIndicator();
+                
+                // Get selected model
+                const selectedModel = modelSelect.value;
+                
+                // In a real implementation, this would make an API call to Ollama
+                setTimeout(() => {
+                    // For demo purposes, we'll use simple matching against our FAQ data
+                    const response = getResponseFromFAQ(message);
+                    
+                    // Hide typing indicator
+                    hideTypingIndicator();
+                    
+                    // Add AI response to chat
+                    addMessage(response);
+                }, 1000); // Simulate API delay
+            }
+
+            // Simple function to match user query against FAQ data
+            function getResponseFromFAQ(query) {
+                // Normalize query (lowercase, remove punctuation)
+                const normalizedQuery = query.toLowerCase().replace(/[^\w\s]/g, '');
+                
+                // Try to find a match in our FAQ data
+                for (const faq of faqData) {
+                    const normalizedQuestion = faq.question.toLowerCase().replace(/[^\w\s]/g, '');
+                    
+                    // Check if query contains key words from the question
+                    const keywords = normalizedQuestion.split(' ').filter(word => word.length > 3);
+                    const matchCount = keywords.reduce((count, keyword) => {
+                        return normalizedQuery.includes(keyword) ? count + 1 : count;
+                    }, 0);
+                    
+                    // If more than 50% of keywords match, return this answer
+                    if (matchCount > 0 && matchCount / keywords.length > 0.5) {
+                        return faq.answer;
+                    }
+                }
+                
+                // If no match found, generate a response about not having the answer
+                return "I'm sorry, I don't have specific information about that. Could you provide more details about what you're looking for? Alternatively, you can contact our customer support team for assistance with this question.";
+            }
+
+            // Event listeners
+            sendButton.addEventListener('click', sendMessage);
+            
+            messageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
